@@ -9,21 +9,10 @@ router.get('/',
 );
 
 router.get('/callback',
-  passport.authenticate('google')
+  passport.authenticate('google'),
+  (req, res) => {
+    res.redirect('/surveys')
+  }
 );
 
 module.exports = router;
-
-
-
-
-
-// app.get('/auth/google',
-//   passport.authenticate('google', {  // 'google' = instance of new GoogleStrategy()
-//     scope: ['profile', 'email']      // 'scope' = specifies to google server, what aceess we want to have inside the user's profile
-//   })
-// );
-
-// app.get('/auth/google/callback',
-//   passport.authenticate('google')
-// );

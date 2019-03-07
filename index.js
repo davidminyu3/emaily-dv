@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 
-const keys = require('./config/keys');
+const keys = require('./config/dev');
 require('./models/User');
 require('./services/passport');
 
@@ -12,6 +13,7 @@ mongoose.Promise = global.Promise;
 
 const app = express();
 
+app.use(bodyParser.json());
 app.use(
   cookieSession({
     maxAge: 30 * 24 * 60 * 60 * 1000,  // duration of existence in browser, before the cookie expires
@@ -22,11 +24,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const authRoutes = require('./routes/authRoutes');
+const apiRoutes = require('./routes/apiRoutes');
 app.use('/auth/google', authRoutes);
+app.use('/api', apiRoutes);
 
-app.get('/api/current_user', (req, res) => {
-  res.send(req.user);
-});
+if (process.env.NODE_ENV === 'production') {
+  // express will serve up production assets
+  // like our main.js, or main.css files
+  app.use(express.static('client/build'));
+
+  // express will serve up index.html file
+  // if it doesn't recognize the route
+  const path = require('path');
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+};
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT);
